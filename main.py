@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog
 from PIL import Image
 from PIL.ImageQt import ImageQt
 from PyQt5.uic import loadUi
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QImage
 
 
 class GoruntuIsleme(QDialog):
@@ -25,14 +25,26 @@ class GoruntuIsleme(QDialog):
         self.btOteleme.clicked.connect(self.fotoOteleme)
         self.btYakinlastir.clicked.connect(self.fotoYakinlastir)
 
+
+    def fotoSet(self,fotograf):
+        global pikseller
+        global w, h
+        w,h = fotograf.size
+        pikseller = list(fotograf.getdata())
+
+    def fotoOlustur(self):
+        foto = Image.new("RGB", (w, h))
+        foto.putdata(pikseller)
+        return foto
+
     def fotoYukle(self):
         global fname
-        global resim
         fname = QFileDialog.getOpenFileName(self, 'Open file','c:\\',"Image files (*.jpg *.gif)")
         foto = Image.open(fname[0])
         self.fotograg = ImageQt(foto)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
 
     def fotoReset(self):
         self.lbMesaj.setPixmap(QPixmap(fname[0]))
@@ -44,32 +56,32 @@ class GoruntuIsleme(QDialog):
         f.close()
 
     def fotoNegatif(self):
-        global islenmisfoto
-        foto = Image.open(fname[0]).convert('RGB')
-        for i in range(foto.size[0]):
-            for j in range(foto.size[1]):
+        foto = self.fotoOlustur()
+        for i in range(w):
+            for j in range(h):
                 r,g,b=foto.getpixel((i,j))
                 foto.putpixel( (i,j), (255-r,255-g,255-b))
         self.fotograg = ImageQt(foto)
-        islenmisfoto = self.fotograg
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
 
     def fotoGri(self):
-        foto = Image.open(fname[0]).convert('RGB')
+        foto = self.fotoOlustur()
         gri = Image.new('L', (foto.size[0], foto.size[1]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
                 r, g, b = foto.getpixel((i,j))
-                value = r * 299.0 / 1000 + g * 587.0 / 1000 + b * 114.0 / 1000
+                value = (r+g+b)/3
                 value = int(value)
                 gri.putpixel((i,j), value)
         self.fotograg = ImageQt(gri)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(gri)
 
     def foto90derece(self):
-        foto = Image.open(fname[0]).convert('RGB')
+        foto = self.fotoOlustur()
         yeni = Image.new('RGB',  (foto.size[1], foto.size[0]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
@@ -78,9 +90,10 @@ class GoruntuIsleme(QDialog):
         self.fotograg = ImageQt(yeni)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(yeni)
 
     def fotoTersCevir(self):
-        foto = Image.open(fname[0]).convert('RGB')
+        foto = self.fotoOlustur()
         yeni = Image.new('RGB',  (foto.size[0],foto.size[1]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
@@ -89,9 +102,10 @@ class GoruntuIsleme(QDialog):
         self.fotograg = ImageQt(yeni)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(yeni)
 
     def fotoAyanalama(self):
-        foto = Image.open(fname[0]).convert('RGB')
+        foto = self.fotoOlustur()
         yeni = Image.new('RGB',  (foto.size[0],foto.size[1]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
@@ -100,9 +114,10 @@ class GoruntuIsleme(QDialog):
         self.fotograg = ImageQt(yeni)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(yeni)
 
     def fotoOteleme(self):
-        foto = Image.open(fname[0]).convert('RGB')
+        foto = self.fotoOlustur()
         yeni = Image.new('RGB',  (foto.size[0],foto.size[1]))
         for i in range(0,(foto.size[0])):
             for j in range(0,(foto.size[1])):
@@ -114,17 +129,19 @@ class GoruntuIsleme(QDialog):
         self.fotograg = ImageQt(yeni)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(yeni)
 
     def fotoYakinlastir(self):
-        foto = Image.open(fname[0]).convert('RGB')
-        yeni = Image.new('RGB',  (foto.size[0]*1.1,foto.size[1]))
-        for i in range(0,(foto.size[0])):
-            for j in range(0,(foto.size[1])):
-                r,g,b = foto.getpixel((i,j))
-                yeni.putpixel((i, j), (r, g, b))
-        self.fotograg = ImageQt(yeni)
+        #TODO yapılacak
+        foto = self.fotoOlustur()
+        g = int(round(0.9*w))
+        y = int(round(0.9*h))
+        foto = foto.resize((g,y ))
+        print(g,y)
+        self.fotograg = ImageQt(foto)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
 
 if __name__ == '__main__':
     app=QApplication(sys.argv)
