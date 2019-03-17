@@ -24,6 +24,10 @@ class GoruntuIsleme(QDialog):
         self.btAynalama.clicked.connect(self.fotoAyanalama)
         self.btOteleme.clicked.connect(self.fotoOteleme)
         self.btYakinlastir.clicked.connect(self.fotoYakinlastir)
+        self.btUzaklastir.clicked.connect(self.fotoUzaklastir)
+        self.btParlaklikartir.clicked.connect(self.fotoParlaklikArtir)
+        self.btParlaklikazalt.clicked.connect(self.fotoParlaklikAzalt)
+        self.btEsikleme.clicked.connect(self.fotoEsikleme)
 
 
     def fotoSet(self,fotograf):
@@ -40,23 +44,38 @@ class GoruntuIsleme(QDialog):
     def fotoYukle(self):
         global fname
         fname = QFileDialog.getOpenFileName(self, 'Open file','c:\\',"Image files (*.jpg *.gif)")
+
+        if fname is None:
+            return
         foto = Image.open(fname[0])
+
+        self.lbMesaj.setScaledContents(True)
         self.fotograg = ImageQt(foto)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
         self.fotoSet(foto)
 
     def fotoReset(self):
-        self.lbMesaj.setPixmap(QPixmap(fname[0]))
+        foto = Image.open(fname[0])
+        self.lbMesaj.setScaledContents(True)
+        self.fotograg = ImageQt(foto)
+        pixMap = QPixmap.fromImage(self.fotograg)
+        self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
 
     def fotoKaydet(self):
-        f = filedialog.asksaveasfile(mode='w', defaultextension='.jpg')
-        if f:
-            fname[0].save(f)
+        foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(True)
+        f = filedialog.asksaveasfile(mode='wb',defaultextension='.jpg')
+        if f is None:
+            return
+        foto.save(f)
         f.close()
 
     def fotoNegatif(self):
         foto = self.fotoOlustur()
+
+        self.lbMesaj.setScaledContents(True)
         for i in range(w):
             for j in range(h):
                 r,g,b=foto.getpixel((i,j))
@@ -68,6 +87,8 @@ class GoruntuIsleme(QDialog):
 
     def fotoGri(self):
         foto = self.fotoOlustur()
+
+        self.lbMesaj.setScaledContents(True)
         gri = Image.new('L', (foto.size[0], foto.size[1]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
@@ -82,6 +103,8 @@ class GoruntuIsleme(QDialog):
 
     def foto90derece(self):
         foto = self.fotoOlustur()
+
+        self.lbMesaj.setScaledContents(True)
         yeni = Image.new('RGB',  (foto.size[1], foto.size[0]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
@@ -94,6 +117,7 @@ class GoruntuIsleme(QDialog):
 
     def fotoTersCevir(self):
         foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(True)
         yeni = Image.new('RGB',  (foto.size[0],foto.size[1]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
@@ -106,6 +130,7 @@ class GoruntuIsleme(QDialog):
 
     def fotoAyanalama(self):
         foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(True)
         yeni = Image.new('RGB',  (foto.size[0],foto.size[1]))
         for i in range(foto.size[0]):
             for j in range(foto.size[1]):
@@ -119,6 +144,7 @@ class GoruntuIsleme(QDialog):
     def fotoOteleme(self):
         foto = self.fotoOlustur()
         yeni = Image.new('RGB',  (foto.size[0],foto.size[1]))
+        self.lbMesaj.setScaledContents(True)
         for i in range(0,(foto.size[0])):
             for j in range(0,(foto.size[1])):
                 if i<100 or j<100:
@@ -132,8 +158,20 @@ class GoruntuIsleme(QDialog):
         self.fotoSet(yeni)
 
     def fotoYakinlastir(self):
-        #TODO yapılacak
         foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(False)
+        g = int(round(1.1*w))
+        y = int(round(1.1*h))
+        foto = foto.resize((g,y ))
+        print(g,y)
+        self.fotograg = ImageQt(foto)
+        pixMap = QPixmap.fromImage(self.fotograg)
+        self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
+
+    def fotoUzaklastir(self):
+        foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(False)
         g = int(round(0.9*w))
         y = int(round(0.9*h))
         foto = foto.resize((g,y ))
@@ -142,6 +180,57 @@ class GoruntuIsleme(QDialog):
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
         self.fotoSet(foto)
+
+    def fotoParlaklikArtir(self):
+        foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(True)
+        for i in range(0, (foto.size[0])):
+            for j in range(0, (foto.size[1])):
+                r,g,b = foto.getpixel((i,j))
+                foto.putpixel((i, j), (r + 50, g + 50, b + 50))
+        self.fotograg = ImageQt(foto)
+        pixMap = QPixmap.fromImage(self.fotograg)
+        self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
+
+    def fotoParlaklikAzalt(self):
+        foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(True)
+        for i in range(0, (foto.size[0])):
+            for j in range(0, (foto.size[1])):
+                r, g, b = foto.getpixel((i, j))
+                foto.putpixel((i, j), (r - 50, g - 50, b - 50))
+        self.fotograg = ImageQt(foto)
+        pixMap = QPixmap.fromImage(self.fotograg)
+        self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
+
+    def fotoEsikleme(self):
+        foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(True)
+        for i in range(0, (foto.size[0])):
+            for j in range(0, (foto.size[1])):
+                r, g, b = foto.getpixel((i, j))
+                if (r+g+b)/3>128:
+                    foto.putpixel((i,j),(255,255,255))
+                else:
+                    foto.putpixel((i,j),(0,0,0))
+        self.fotograg = ImageQt(foto)
+        pixMap = QPixmap.fromImage(self.fotograg)
+        self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
+
+        foto = self.fotoOlustur()
+        self.lbMesaj.setScaledContents(False)
+        g = int(round(0.9*w))
+        y = int(round(0.9*h))
+        foto = foto.resize((g,y ))
+        print(g,y)
+        self.fotograg = ImageQt(foto)
+        pixMap = QPixmap.fromImage(self.fotograg)
+        self.lbMesaj.setPixmap(pixMap)
+        self.fotoSet(foto)
+
 
 if __name__ == '__main__':
     app=QApplication(sys.argv)
