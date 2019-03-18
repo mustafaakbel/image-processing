@@ -1,12 +1,11 @@
 import sys
 from tkinter import filedialog
 
-from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog
-from PIL import Image
+from PIL import Image, ImageOps
 from PIL.ImageQt import ImageQt
 from PyQt5.uic import loadUi
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap
 
 
 class GoruntuIsleme(QDialog):
@@ -28,6 +27,7 @@ class GoruntuIsleme(QDialog):
         self.btParlaklikartir.clicked.connect(self.fotoParlaklikArtir)
         self.btParlaklikazalt.clicked.connect(self.fotoParlaklikAzalt)
         self.btEsikleme.clicked.connect(self.fotoEsikleme)
+        self.btHistogram.clicked.connect(self.fotoHistogram)
 
 
     def fotoSet(self,fotograf):
@@ -43,12 +43,8 @@ class GoruntuIsleme(QDialog):
 
     def fotoYukle(self):
         global fname
-        fname = QFileDialog.getOpenFileName(self, 'Open file','c:\\',"Image files (*.jpg *.gif)")
-
-        if fname is None:
-            return
+        fname = QFileDialog.getOpenFileName(self, 'Open file','c:\\',"Image files (*.jpg *.gif *.png)")
         foto = Image.open(fname[0])
-
         self.lbMesaj.setScaledContents(True)
         self.fotograg = ImageQt(foto)
         pixMap = QPixmap.fromImage(self.fotograg)
@@ -74,7 +70,6 @@ class GoruntuIsleme(QDialog):
 
     def fotoNegatif(self):
         foto = self.fotoOlustur()
-
         self.lbMesaj.setScaledContents(True)
         for i in range(w):
             for j in range(h):
@@ -103,7 +98,6 @@ class GoruntuIsleme(QDialog):
 
     def foto90derece(self):
         foto = self.fotoOlustur()
-
         self.lbMesaj.setScaledContents(True)
         yeni = Image.new('RGB',  (foto.size[1], foto.size[0]))
         for i in range(foto.size[0]):
@@ -220,12 +214,9 @@ class GoruntuIsleme(QDialog):
         self.lbMesaj.setPixmap(pixMap)
         self.fotoSet(foto)
 
+    def fotoHistogram(self):
         foto = self.fotoOlustur()
-        self.lbMesaj.setScaledContents(False)
-        g = int(round(0.9*w))
-        y = int(round(0.9*h))
-        foto = foto.resize((g,y ))
-        print(g,y)
+        foto = ImageOps.equalize(foto)
         self.fotograg = ImageQt(foto)
         pixMap = QPixmap.fromImage(self.fotograg)
         self.lbMesaj.setPixmap(pixMap)
